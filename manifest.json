@@ -1,0 +1,80 @@
+{
+  "manifest_version": 3,
+  "name": "HiringCafe+",
+  "version": "1.0.0",
+  "description": "Supercharges hiring.cafe: LinkedIn/Indeed cross-check, company ratings & intel, ATS badges, smart filters, tracking, and alerts.",
+  "permissions": ["storage", "alarms", "notifications"],
+  "host_permissions": [
+    "https://hiringcafe.com/*",
+    "https://www.hiringcafe.com/*",
+    "https://hiring.cafe/*",
+    "https://www.hiring.cafe/*",
+    "https://www.linkedin.com/jobs-guest/*",
+    "https://www.indeed.com/*",
+    "https://www.glassdoor.com/*",
+    "https://www.levels.fyi/companies/*",
+    "https://firestore.googleapis.com/v1/projects/hiringcafe-ec4d6/*",
+    "https://securetoken.googleapis.com/v1/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://hiringcafe.com/*",
+        "https://www.hiringcafe.com/*",
+        "https://hiring.cafe/*",
+        "https://www.hiring.cafe/*"
+      ],
+      "exclude_matches": [
+        "https://hiringcafe.com/internal*",
+        "https://www.hiringcafe.com/internal*",
+        "https://hiring.cafe/internal*",
+        "https://www.hiring.cafe/internal*"
+      ],
+      "js": [
+        "lib/staticdata.js",
+        "content/core.js",
+        "content/features.js",
+        "content/ui.js"
+      ],
+      "css": ["content/content.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.indeed.com/*"],
+      "js": ["lib/match.js", "content/indeed-proxy.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.glassdoor.com/*"],
+      "js": ["content/glassdoor-proxy.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["content/inject.js"],
+      "matches": [
+        "https://hiringcafe.com/*",
+        "https://www.hiringcafe.com/*",
+        "https://hiring.cafe/*",
+        "https://www.hiring.cafe/*"
+      ]
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

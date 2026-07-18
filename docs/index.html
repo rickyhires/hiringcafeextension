@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HiringCafe+ — Privacy Policy</title>
+<style>
+  :root { --pink:#ec4899; --fg:#1f2430; --muted:#5b6472; --line:#e5e7eb; --bg:#ffffff; --soft:#f8fafc; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  .wrap { max-width:760px; margin:0 auto; padding:48px 22px 80px; }
+  header { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:28px; }
+  h1 { font-size:28px; font-weight:800; letter-spacing:-.3px; margin:0 0 6px; }
+  h1 span { color:var(--pink); }
+  .date { color:var(--muted); font-size:14px; }
+  h2 { font-size:18px; font-weight:700; margin:34px 0 10px; }
+  p, li { color:#2b303b; }
+  a { color:var(--pink); }
+  .tldr { background:var(--soft); border:1px solid var(--line); border-radius:12px; padding:16px 18px; }
+  .tldr strong { color:var(--fg); }
+  ul { padding-left:22px; }
+  li { margin:6px 0; }
+  code { background:var(--soft); border:1px solid var(--line); border-radius:5px; padding:1px 5px; font-size:13.5px; }
+  footer { margin-top:44px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:14px; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg:#e7e9ee; --muted:#9aa3b2; --line:#2a2f3a; --bg:#14161c; --soft:#1c2029; }
+    body { background:var(--bg); color:var(--fg); }
+    p, li { color:#d4d8e0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>HiringCafe<span>+</span> — Privacy Policy</h1>
+    <div class="date">Effective date: July 17, 2026</div>
+  </header>
+
+  <p>This policy explains how the <strong>HiringCafe+</strong> browser extension ("the extension", "we") handles your information. HiringCafe+ is published by HiringCafe and enhances the job-search experience on <a href="https://hiring.cafe">hiring.cafe</a>. The extension runs in your own browser.</p>
+
+  <div class="tldr">
+    <strong>In short:</strong> The extension has no server of its own, uses no analytics, and does not collect, sell, or share your data. Your settings, notes, and job marks stay on your device. It talks only to hiring.cafe, LinkedIn, Indeed, Glassdoor, and Levels — for the lookups you see — and to your own HiringCafe account for tracking.
+  </div>
+
+  <h2>Information the extension handles</h2>
+
+  <p><strong>1. Stored on your device.</strong> Your settings, filters, applied/hidden marks, private notes, "seen" history, and a cache of cross-check and rating results are saved in your browser's local storage (<code>chrome.storage.local</code>). This data never leaves your device and is never transmitted to us.</p>
+
+  <p><strong>2. Your HiringCafe account (authentication information).</strong> When you use the tracking features, the extension reads your existing HiringCafe (Google Firebase) login token from your current session and uses it to read and write <em>your own</em> saved, applied, and hidden jobs. This token is sent only to Google (Firebase) and to hiring.cafe, over HTTPS, to act on your own account. It is never sent to us or to any third party, and is never included in any data you export.</p>
+
+  <p><strong>3. Cross-check and rating lookups (website content).</strong> To show whether a job also appears on LinkedIn or Indeed and to display company ratings, the extension sends the job's title, company, and location as search queries to LinkedIn, Indeed, Glassdoor, and Levels.fyi. These lookups run in your own browser. The extension may briefly open background helper tabs to Indeed or Glassdoor to complete a lookup; these close automatically shortly afterward.</p>
+
+  <h2>What we do not do</h2>
+  <ul>
+    <li>We do not operate any server that receives your data, and we run no analytics or telemetry.</li>
+    <li>We do not collect, sell, rent, or share your personal data with anyone.</li>
+    <li>We do not use your data for advertising, profiling, creditworthiness, or lending.</li>
+    <li>We do not use your data for any purpose other than the extension's single purpose above.</li>
+  </ul>
+
+  <h2>Third-party services</h2>
+  <p>Requests the extension makes on your behalf go to hiring.cafe, LinkedIn, Indeed, Glassdoor, Levels.fyi, and Google Firebase (for your own HiringCafe account). Your interactions with those services are governed by their own privacy policies. We have no control over, and are not responsible for, their practices.</p>
+
+  <h2>Permissions</h2>
+  <ul>
+    <li><code>storage</code> — save your settings, marks, notes, and caches locally.</li>
+    <li><code>alarms</code> — schedule optional saved-search checks and clean up temporary helper tabs.</li>
+    <li><code>notifications</code> — show a desktop alert for searches you choose to watch.</li>
+    <li>Host access to hiring.cafe, LinkedIn, Indeed, Glassdoor, Levels.fyi, and Google Firebase/securetoken — to add the extension's features and sync your own account, as described above.</li>
+  </ul>
+
+  <h2>Data retention and your controls</h2>
+  <p>Locally stored data remains in your browser until you remove it. You can clear the extension's cache and reset "seen" history from the extension popup, and removing all local data is as simple as uninstalling the extension. Changes you sync to your HiringCafe account are managed through your HiringCafe account.</p>
+
+  <h2>Children</h2>
+  <p>The extension is a general-purpose job-search tool and is not directed at children under 13.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>We may update this policy as the extension evolves. Material changes will be reflected here with a new effective date.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy? Contact <a href="mailto:ali@hiring.cafe">ali@hiring.cafe</a>.</p>
+
+  <footer>HiringCafe+ is an independent enhancement for hiring.cafe. Product names and logos of LinkedIn, Indeed, Glassdoor, and Levels.fyi belong to their respective owners.</footer>
+</div>
+</body>
+</html>

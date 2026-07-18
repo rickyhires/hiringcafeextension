@@ -1,0 +1,6 @@
+# Build artifacts / packaging (zips live outside the repo)
+*.zip
+
+# OS cruft
+.DS_Store
+Thumbs.db

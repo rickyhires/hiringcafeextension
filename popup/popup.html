@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <h1>HiringCafe<span>+</span></h1>
+    <span class="ver" id="ver"></span>
+  </header>
+
+  <div id="sections"></div>
+
+  <section class="stats">
+    <h2>Stats</h2>
+    <div id="stats-body">Loading…</div>
+  </section>
+
+  <section class="actions">
+    <button id="btn-export-csv">Export saved jobs (CSV)</button>
+    <button id="btn-export-json">Export everything (JSON)</button>
+    <button id="btn-clear-cache">Clear check cache</button>
+    <button id="btn-reset-seen" class="danger">Reset seen history</button>
+  </section>
+  <script src="popup.js"></script>
+</body>
+</html>
