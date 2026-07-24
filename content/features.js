@@ -9,11 +9,23 @@
   const DATA = () => globalThis.HCX_DATA;
   const S = () => state.settings;
 
+  function jobPageHost(root) {
+    let host = [...root.children].find(n => n.classList && /flex-wrap/.test(String(n.className)));
+    if (!host) { host = el('div', { class: 'hcx-jobpage-pills' }); root.appendChild(host); }
+    host.classList.add('hcx-jobpage-host');
+    return host;
+  }
+
   function badgeRow(ctl) {
     let row = ctl.root.querySelector(':scope .hcx-badges');
     if (row) return row;
     row = el('span', { class: 'hcx-badges' });
-    if (ctl.surface === 'modal' || ctl.surface === 'tracker' || ctl.surface === 'jobpage') {
+    if (ctl.surface === 'jobpage') {
+      row.classList.add('hcx-badges-pills');
+      jobPageHost(ctl.root).appendChild(row);
+      return row;
+    }
+    if (ctl.surface === 'modal' || ctl.surface === 'tracker') {
 
       if (ctl.surface !== 'tracker') {
         const h2 = ctl.root.querySelector('h2.font-extrabold, h2[class*="text-3xl"]');
@@ -53,6 +65,7 @@
   }
 
   function syncCell(ctl) {
+    if (ctl.surface === 'jobpage') return;
     const hidden = ['hcx-hidden-collapsed', 'hcx-dupe-collapsed', 'hcx-filtered', 'hcx-blocked']
       .some(c => ctl.root.classList.contains(c));
     const cell = gridItemOf(ctl);
@@ -292,7 +305,7 @@
     }
 
     if (!S().salaryNorm) return;
-    const pills = ctl.root.querySelector('div[class*="flex-wrap"]');
+    const pills = ctl.surface === 'jobpage' ? jobPageHost(ctl.root) : ctl.root.querySelector('div[class*="flex-wrap"]');
     if (!pills) return;
     for (const sp of pills.querySelectorAll('span')) {
       if (sp.closest('.hcx-badges') || sp.classList.contains('hcx-salary')) continue;
@@ -355,7 +368,7 @@
     if (!mark || !MARK_META[mark]) { syncCell(ctl); return; }
     ctl.root.classList.add(MARK_META[mark].cls);
     const chip = el('span', { class: 'hcx-chip hcx-chip-' + mark, text: MARK_META[mark].chip });
-    ctl.root.appendChild(chip);
+    (ctl.surface === 'jobpage' ? badgeRow(ctl) : ctl.root).appendChild(chip);
     syncCell(ctl);
   }
 
@@ -400,6 +413,21 @@
   }
   HCX.reportFocused = ctl => { const bar = ctl.root.querySelector(':scope .hcx-report-btn'); openReportMenu(ctl, bar || ctl.root); };
 
+  async function blockCompanyForever(ctl) {
+    const co = ctl.job.company;
+    if (!co) { toast('No company on this card'); return; }
+    if (companyHiddenNow(co)) { toast(co + ' is already hidden'); return; }
+    if (!HCX.confirmModal || !HCX.hideCompanyForever) return;
+    const ok = await HCX.confirmModal(
+      'Hide every job from “' + co + '”, now and in future searches? This saves a permanent company rule in your ⚙ Filters, where you can remove it any time.',
+      { title: '🚫 Hide this company', ok: 'Hide ' + co, danger: true });
+    if (!ok) return;
+    if (!await HCX.hideCompanyForever(co, true)) { toast('Could not update your filters'); return; }
+    applyFilterAll();
+    refreshHideCompany();
+    toast('🚫 ' + co + ' hidden everywhere', { action: { label: 'Undo', fn: async () => { await HCX.hideCompanyForever(co, false); applyFilterAll(); refreshHideCompany(); } } });
+  }
+
   function addActionBar(ctl) {
     if (ctl.root.querySelector(':scope .hcx-actions')) return;
     const bar = el('div', { class: 'hcx-actions' });
@@ -408,10 +436,58 @@
     bar.append(
       el('button', { type: 'button', title: 'Applied (a)', text: '✓', onclick: e => { e.preventDefault(); e.stopPropagation(); setMark(cur(), 'a'); } }),
       el('button', { type: 'button', class: 'hcx-report-btn', title: 'Report job (r)', text: '🚩', onclick: e => { e.preventDefault(); e.stopPropagation(); openReportMenu(cur(), e.currentTarget); } }),
-      el('button', { type: 'button', class: 'hcx-note-btn', title: 'Note (n)', text: state.notes[ctl.slug] ? '📝' : '🗒', onclick: e => { e.preventDefault(); e.stopPropagation(); HCX.editNote && HCX.editNote(cur()); } })
+      el('button', { type: 'button', class: 'hcx-note-btn', title: 'Note (n)', text: state.notes[ctl.slug] ? '📝' : '🗒', onclick: e => { e.preventDefault(); e.stopPropagation(); HCX.editNote && HCX.editNote(cur()); } }),
+      el('button', { type: 'button', class: 'hcx-block-btn', title: 'Never show this company again', text: '🚫', onclick: e => { e.preventDefault(); e.stopPropagation(); blockCompanyForever(cur()); } })
     );
-    ctl.root.appendChild(bar);
+    if (ctl.surface === 'jobpage') jobPageHost(ctl.root).appendChild(bar);
+    else ctl.root.appendChild(bar);
   }
+
+  function companyHiddenNow(name) {
+    const co = String(name || '').trim().toLowerCase();
+    if (!co) return false;
+    for (const r of (state.autoHide.rules || [])) {
+      const m = String(r).match(/^\s*company\s*:\s*(.+)$/i);
+      if (m && m[1].trim().toLowerCase() === co) return true;
+    }
+    return (state.blocklists.companies || []).some(c => String(c).trim().toLowerCase() === co);
+  }
+
+  let hideCoBar = null;
+  function renderHideCompany(ctl) {
+    if (ctl.surface !== 'jobpage') return;
+    const co = ctl.job.company;
+    const main = document.querySelector('main');
+    if (!co || !main) { hideCoBar?.remove(); hideCoBar = null; return; }
+    if (!hideCoBar || !hideCoBar.isConnected) {
+      hideCoBar = el('div', { class: 'hcx-hide-co-bar' });
+      const nav = [...main.children].reverse().find(n => n.tagName === 'NAV');
+      if (nav) main.insertBefore(hideCoBar, nav); else main.appendChild(hideCoBar);
+    }
+    const on = companyHiddenNow(co);
+    hideCoBar.textContent = '';
+    const btn = el('button', {
+      type: 'button', class: 'hcx-hide-co' + (on ? ' hcx-hide-co-on' : ''),
+      title: on ? 'Remove ' + co + ' from your filters' : 'Never show jobs from ' + co + ' again',
+      text: on ? '✓ ' + co + ' is hidden — click to unhide' : '🚫 Never show jobs from ' + co,
+      onclick: async () => {
+        btn.disabled = true;
+        const ok = HCX.hideCompanyForever ? await HCX.hideCompanyForever(co, !on) : false;
+        btn.disabled = false;
+        if (!ok) { toast('Could not update your filters'); return; }
+        renderHideCompany(ctl);
+        applyFilterAll();
+        if (on) toast(co + ' unhidden');
+        else toast('🚫 ' + co + ' hidden everywhere', { action: { label: 'Undo', fn: async () => { await HCX.hideCompanyForever(co, false); renderHideCompany(ctl); applyFilterAll(); } } });
+      }
+    });
+    hideCoBar.append(btn, el('div', {
+      class: 'hcx-hide-co-note',
+      text: on ? 'Saved in ⚙ Filters — jobs from this company stay hidden from your search results.'
+        : 'Adds a permanent company rule to ⚙ Filters, applied to every search from now on.'
+    }));
+  }
+  HCX.renderHideCompany = renderHideCompany;
 
   function renderNoteIndicator(ctl) {
     const has = !!state.notes[ctl.slug];
@@ -496,6 +572,7 @@
   }
 
   function applyFilter(ctl) {
+    if (ctl.surface === 'jobpage') return;
     const blocked = isBlocked(ctl);
     ctl.root.classList.toggle('hcx-blocked', blocked);
     ctl.root.classList.toggle('hcx-filtered', !blocked && !cardMatchesFilter(ctl));
@@ -670,11 +747,17 @@
     ensureRating,
     renderIntel, renderATS, renderSalary, renderSignals,
     ctl => { applyMarkStyles(ctl); addActionBar(ctl); renderNoteIndicator(ctl); },
+    renderHideCompany,
     applyFilter
   );
 
+  function refreshHideCompany() {
+    const jp = [...state.cards.values()].find(c => c.surface === 'jobpage' && c.root.isConnected);
+    if (jp) renderHideCompany(jp);
+  }
+
   HCX.hooks.onCardsChanged.push(() => { recomputeGroups(); updateDigest(); ensureFilterBar(); });
-  HCX.hooks.onSettings.push(() => { document.documentElement.classList.toggle('hcx-ungroup', !!S().ungroupCarousels); applyFilterAll(); recomputeGroups(); ensureFilterBar(); });
+  HCX.hooks.onSettings.push(() => { document.documentElement.classList.toggle('hcx-ungroup', !!S().ungroupCarousels); applyFilterAll(); recomputeGroups(); ensureFilterBar(); refreshHideCompany(); });
 
   HCX.hooks.onNewQuery.push(() => expandedCompanies.clear());
   HCX.applyFilterAll = applyFilterAll;

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "HiringCafe+",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Supercharges hiring.cafe: LinkedIn/Indeed cross-check, company ratings & intel, ATS badges, smart filters, tracking, and alerts.",
   "permissions": ["storage", "alarms", "notifications"],
   "host_permissions": [

@@ -194,6 +194,24 @@
   }
   HCX.blockCompany = blockCompany;
 
+  async function hideCompanyForever(name, on = true) {
+    const co = String(name || '').trim();
+    if (!co) return false;
+    let data = {};
+    try { ({ filters: data = {} } = await chrome.storage.local.get('filters')); } catch { }
+    const f = { presets: { ...(data.presets || {}) }, custom: [...(data.custom || [])], accountWide: !!data.accountWide };
+    const same = c => c.field === 'company' && String(c.value || '').trim().toLowerCase() === co.toLowerCase();
+    const had = f.custom.some(same);
+    if (on === had) return true;
+    if (on) f.custom.push({ field: 'company', op: 'contains', value: co });
+    else f.custom = f.custom.filter(c => !same(c));
+    await saveFiltersState(f);
+    state.autoHide = { rules: compileFilters(f), accountWide: !!f.accountWide };
+    if (HCX.rebuildAutoHide) HCX.rebuildAutoHide();
+    return true;
+  }
+  HCX.hideCompanyForever = hideCompanyForever;
+
   async function watchThisSearch() {
     const stateStr = HCX.pager?.searchStateStr || '{}';
     let label = 'Search';
@@ -461,18 +479,22 @@
   }
   HCX.accountMark = accountMark;
 
-  function confirmModal(msg) {
+  function confirmModal(msg, opts = {}) {
     return new Promise(resolve => {
-      const m = el('div', { class: 'hcx-note-modal', onclick: e => { if (e.target === m) { m.remove(); resolve(false); } } });
+      const done = v => { m.remove(); document.removeEventListener('keydown', onKey, true); resolve(v); };
+      const onKey = e => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(false); } };
+      const m = el('div', { class: 'hcx-note-modal', onclick: e => { if (e.target === m) done(false); } });
       m.appendChild(el('div', { class: 'hcx-note-box' },
-        el('div', { class: 'hcx-note-title', text: 'Confirm' }),
+        el('div', { class: 'hcx-note-title', text: opts.title || 'Confirm' }),
         el('div', { style: 'font-size:13px;line-height:1.4;margin-bottom:12px', text: msg }),
         el('div', { class: 'hcx-note-actions' },
-          el('button', { class: 'hcx-note-save', text: 'Hide in my account', onclick: () => { m.remove(); resolve(true); } }),
-          el('button', { text: 'Cancel', onclick: () => { m.remove(); resolve(false); } }))));
+          el('button', { class: 'hcx-note-save' + (opts.danger ? ' hcx-note-danger' : ''), text: opts.ok || 'Confirm', onclick: () => done(true) }),
+          el('button', { text: 'Cancel', onclick: () => done(false) }))));
       document.body.appendChild(m);
+      document.addEventListener('keydown', onKey, true);
     });
   }
+  HCX.confirmModal = confirmModal;
 
   async function applyAccountAutohide() {
     try {
@@ -483,7 +505,7 @@
         const id = String(c.hit.objectID || c.hit.id); if (seen.has(id)) return false; seen.add(id); return true;
       });
       if (!matches.length) return { ok: true, message: 'No jobs on this page match your filters.' };
-      const ok = await confirmModal(`Hide ${Math.min(matches.length, ACCOUNT_HIDE_CAP)} job(s) in your real HiringCafe account? This writes across all your devices (reversible via the site’s Hidden list). Up to ${ACCOUNT_HIDE_CAP} per run.`);
+      const ok = await confirmModal(`Hide ${Math.min(matches.length, ACCOUNT_HIDE_CAP)} job(s) in your real HiringCafe account? This writes across all your devices (reversible via the site’s Hidden list). Up to ${ACCOUNT_HIDE_CAP} per run.`, { ok: 'Hide in my account', danger: true });
       if (!ok) return { ok: true, message: 'Cancelled — nothing written. (Local hide still active.)' };
       const n = await accountHide(matches);
       return { ok: true, message: `Hid ${n} job(s) in your account. Scroll to load more, then run again.` };

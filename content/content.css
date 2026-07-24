@@ -107,6 +107,7 @@ html.dark, html[data-theme="dark"], body.chakra-ui-dark {
   align-items: center; justify-content: center; box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
 }
 .hcx-actions button:hover { background: var(--hcx-pink); border-color: var(--hcx-pink); color: #fff; }
+.hcx-actions .hcx-block-btn:hover { background: #dc2626; border-color: #dc2626; }
 .hcx-card.hcx-has-note .hcx-note-btn { color: var(--hcx-pink); }
 
 .hcx-card.hcx-focus { box-shadow: 0 0 0 3px var(--hcx-pink) !important; }
@@ -221,6 +222,7 @@ html.hcx-compact .hcx-card { min-height: 0 !important; }
 .hcx-note-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
 .hcx-note-actions button { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--hcx-line); background: var(--hcx-soft); color: var(--hcx-fg); font-weight: 600; font-size: 13px; cursor: pointer; }
 .hcx-note-actions .hcx-note-save { background: var(--hcx-pink); border-color: var(--hcx-pink); color: #fff; }
+.hcx-note-actions .hcx-note-save.hcx-note-danger { background: #dc2626; border-color: #dc2626; color: #fff; }
 
 .hcx-flt-modal { position: fixed; inset: 0; z-index: 100000; background: rgb(0 0 0 / 0.4); display: flex; align-items: center; justify-content: center; }
 .hcx-flt-box { width: 480px; max-width: 94vw; max-height: 84vh; overflow: auto; background: var(--hcx-panel); border-radius: 12px; box-shadow: var(--hcx-shadow); padding: 16px; font-family: system-ui, sans-serif; color: var(--hcx-fg); }
@@ -303,3 +305,30 @@ html.hcx-compact .hcx-card { min-height: 0 !important; }
 .hcx-exp-status { margin-top: 10px; font-size: 12px; color: var(--hcx-muted); min-height: 16px; }
 
 html.hcx-suppress-popups [class*="maestra"], html.hcx-suppress-popups iframe[src*="maestra"] { display: none !important; }
+
+.hcx-jobpage-pills { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
+.hcx-jobpage-host { row-gap: 8px; }
+.hcx-surface-jobpage .hcx-badges { align-self: center; }
+.hcx-surface-jobpage.hcx-seen { opacity: 1; }
+.hcx-surface-jobpage.hcx-marked-a { box-shadow: none; }
+.hcx-surface-jobpage .hcx-actions {
+  position: static; opacity: 1; pointer-events: auto;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.hcx-surface-jobpage .hcx-chip { position: static; }
+.hcx-surface-jobpage .hcx-intel { margin-top: 0; width: 100%; }
+
+.hcx-hide-co-bar {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+  margin: 22px 0 8px; font-family: system-ui, sans-serif;
+}
+.hcx-hide-co {
+  display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 9999px;
+  border: 1px solid var(--hcx-line); background: var(--hcx-panel); color: #b91c1c;
+  font: 700 13.5px system-ui, sans-serif; cursor: pointer; transition: background .12s, border-color .12s;
+}
+.hcx-hide-co:hover { border-color: #dc2626; background: #fef2f2; }
+.hcx-hide-co:disabled { opacity: 0.6; cursor: wait; }
+.hcx-hide-co.hcx-hide-co-on { color: #166534; border-color: #86efac; background: #dcfce7; }
+.hcx-hide-co.hcx-hide-co-on:hover { border-color: #16a34a; background: #bbf7d0; }
+.hcx-hide-co-note { font-size: 11.5px; color: var(--hcx-muted); }

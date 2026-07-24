@@ -761,14 +761,33 @@
     return null;
   }
 
+  function jobPageHeader() {
+    const scope = document.querySelector('main') || document.body;
+    const h1 = [...scope.querySelectorAll('h1')]
+      .find(h => !h.closest('[role="dialog"]') && !h.closest('#hcx-more-grid') && h.textContent.trim());
+    if (!h1 || !h1.parentElement) return null;
+    const col = h1.parentElement;
+    let root = col;
+    for (let i = 0; i < 2; i++) {
+      const p = root.parentElement;
+      if (!p || p === document.body || p.tagName === 'MAIN') break;
+      root = p;
+    }
+    const next = h1.nextElementSibling;
+    let company = next && /font-bold/.test(String(next.className)) ? next.textContent.trim() : '';
+    if (!company) { const img = root.querySelector('img[alt]'); if (img && img.alt.trim().length > 1) company = img.alt.trim(); }
+    let location = '';
+    for (const d of col.children) {
+      if (d === h1 || d === next || !d.querySelector || d.querySelector('a') || !d.querySelector('svg')) continue;
+      const t = d.textContent.trim();
+      if (t) { location = t; break; }
+    }
+    return { root, title: h1.textContent.trim(), company, location };
+  }
+
   function findJobPage() {
     if (!/^\/job\//.test(location.pathname)) return null;
-    for (const h2 of briefTitles(document)) {
-      if (h2.closest('[role="dialog"]') || h2.closest('#hcx-more-grid')) continue;
-      const jd = readBriefJD(h2);
-      if (jd) return jd;
-    }
-    return null;
+    return jobPageHeader();
   }
   function jobPageHit() {
     try {
@@ -806,7 +825,7 @@
   function deactivate() {
     resetSynthetic();
     document.querySelectorAll(
-      '.hcx-filter-bar, .hcx-digest-btn, .hcx-digest-panel, .hcx-hint, .hcx-help, .hcx-pal, .hcx-note-modal, .hcx-toast-host'
+      '.hcx-filter-bar, .hcx-digest-btn, .hcx-digest-panel, .hcx-hint, .hcx-help, .hcx-pal, .hcx-note-modal, .hcx-toast-host, .hcx-hide-co-bar'
     ).forEach(e => e.remove());
     for (const ctl of [...state.cards.values()]) {
       ctl.root.querySelectorAll(':scope .hcx-badges, :scope .hcx-actions, :scope .hcx-chip, :scope .hcx-intel')
@@ -866,9 +885,13 @@
     const onJobPage = /^\/job\//.test(location.pathname);
     const jp = onJobPage ? findJobPage() : null;
     if (jp && isHydrated(jp.root)) {
-      const j = { title: jp.title, company: jp.company, location: jp.location };
+      const domJob = { title: jp.title, company: jp.company, location: jp.location };
       const pageHit = jobPageHit();
-      const hit = pageHit || hitForJob(j) || null;
+      const hit = pageHit || hitForJob(domJob) || null;
+      const hj = hit ? jobOf(hit) : null;
+      const j = hj
+        ? { title: hj.title || domJob.title, company: hj.company || domJob.company, location: hj.location || domJob.location }
+        : domJob;
       const slug = 'jobpage:' + (hit ? (hit.objectID || hit.id) : fingerprint(j) + '|' + normTitle(j.location || ''));
       ensureDetailSurface(slug, jp.root, 'jobpage', {
         job: j, hit,
@@ -879,6 +902,7 @@
     for (const ctl of [...state.cards.values()]) {
       if (ctl.surface === 'jobpage' && (!ctl.root.isConnected || !onJobPage)) teardown(ctl);
     }
+    if (!onJobPage) document.querySelector('.hcx-hide-co-bar')?.remove();
 
     for (const { root, applyUrl, surface } of findTrackerCards()) {
       const job = extractJob(root);
